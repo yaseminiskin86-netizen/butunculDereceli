@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>BÜTÜNCÜL DERECELİ PUANLAMA ANAHTARI</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .info-box { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; background-color: #f9f9f9; }
+        .info-box label { font-weight: bold; margin-right: 10px; }
+        .info-box input[type="text"] { padding: 5px; border: 1px solid #ccc; width: 250px; margin-right: 20px; }
+        .rubric-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .rubric-table th, .rubric-table td { border: 1px solid #444; padding: 10px; text-align: left; vertical-align: middle; }
+        .rubric-table th { background-color: #007bff; color: white; text-align: center; }
+        .rubric-table td:nth-child(1) { width: 15%; font-weight: bold; background-color: #e6f7ff; } 
+        .rubric-table td:last-child { text-align: center; } 
+        .score-input { width: 60px; text-align: center; font-weight: bold; }
+        .level-4 { background-color: #92d050; color: black; } 
+        .level-3 { background-color: #ffff00; color: black; } 
+        .level-2 { background-color: #ffc000; color: black; } 
+        .level-1 { background-color: #f4b084; color: black; } 
+        .total-score-row th { background-color: #00b0f0; color: black; font-size: 1.1em; }
+        .control-panel { text-align: center; margin-top: 30px; }
+        .action-button { 
+            padding: 10px 20px; 
+            font-size: 16px; 
+            cursor: pointer; 
+            border: none; 
+            border-radius: 5px; 
+            margin: 5px;
+        }
+        .print-button { 
+            background-color: #28a745; 
+            color: white; 
+        }
+        .reset-button { 
+            background-color: #dc3545; 
+            color: white; 
+        }
+        @media print {
+            .control-panel, .info-box input, .score-input, .reset-button { display: none !important; }
+            .info-box { border: none; background-color: white; padding: 0; }
+            .rubric-table td:last-child { display: table-cell !important; }
+            .rubric-table td:last-child span { 
+                display: block !important; 
+                font-weight: bold; 
+                font-size: 1.2em;
+            }
+        }
+    </style>
+    <script>
+        // Puan hesaplama fonksiyonu
+        function calculateScore() {
+            let totalScore = 0;
+            let inputsValid = true;
+            const scoreInputs = document.querySelectorAll('.score-input');
+
+            scoreInputs.forEach(input => {
+                const score = Number(input.value); 
+                
+                if (input.value !== "" && (isNaN(score) || score < 1 || score > 4)) {
+                    inputsValid = false; 
+                }
+                
+                if (score >= 1 && score <= 4) {
+                    totalScore += score;
+                }
+            });
+
+            document.getElementById('totalScore').textContent = totalScore;
+
+            let levelText = '';
+            let levelColor = '#dc3545'; 
+            
+            if (totalScore >= 5 && inputsValid) {
+                if (totalScore >= 17 && totalScore <= 20) {
+                    levelText = 'MÜKEMMEL (17-20)';
+                    levelColor = '#008000'; 
+                } else if (totalScore >= 13 && totalScore <= 16) {
+                    levelText = 'İYİ (13-16)';
+                    levelColor = '#ffc000'; 
+                } else if (totalScore >= 9 && totalScore <= 12) {
+                    levelText = 'GELİŞİYOR (9-12)';
+                    levelColor = '#007bff'; 
+                } else if (totalScore >= 5 && totalScore <= 8) {
+                    levelText = 'YETERSİZ (5-8)';
+                    levelColor = '#dc3545'; 
+                } 
+            } else if (!inputsValid) {
+                 levelText = 'Hatalı puan girişi (1-4 aralığı dışında).';
+            } else {
+                 levelText = 'Lütfen puan girişi yapınız.';
+            }
+
+            const levelElement = document.getElementById('level');
+            levelElement.textContent = levelText;
+            levelElement.style.color = levelColor;
+        }
+
+        // Yazdırma fonksiyonu
+        function printRubric() {
+            const scoreInputs = document.querySelectorAll('.score-input');
+            scoreInputs.forEach(input => {
+                if(input.value && Number(input.value) >= 1 && Number(input.value) <= 4) {
+                    input.insertAdjacentHTML('afterend', `<span>${input.value}</span>`);
+                }
+            });
+
+            window.print();
+            
+            scoreInputs.forEach(input => {
+                const span = input.nextElementSibling;
+                if (span && span.tagName === 'SPAN') {
+                    span.remove();
+                }
+            });
+        }
+        
+        // Form sıfırlama fonksiyonu
+        function resetForm() {
+            document.querySelectorAll('.score-input').forEach(input => {
+                input.value = '';
+            });
+            document.getElementById('ogrenciAdi').value = '';
+            document.getElementById('sinifNo').value = '';
+            
+            calculateScore(); 
+        }
+
+        // Sayfa yüklendiğinde olay dinleyicilerini kur
+        document.addEventListener('DOMContentLoaded', () => {
+             const scoreInputs = document.querySelectorAll('.score-input');
+             scoreInputs.forEach(input => {
+                 input.addEventListener('input', calculateScore); 
+             });
+             calculateScore(); 
+        });
+    </script>
+</head>
+<body>
+
+    <h1>BÜTÜNCÜL DERECELİ PUANLAMA ANAHTARI</h1>
+    
+    <div class="info-box">
+        <label for="ogrenciAdi">ÖĞRENCİ ADI SOYADI:</label>
+        <input type="text" id="ogrenciAdi" value="">
+
+        <label for="sinifNo">SINIF / NUMARASI:</label>
+        <input type="text" id="sinifNo" value="">
+    </div>
+    
+    <table class="rubric-table">
+        <thead>
+            <tr>
+                <th colspan="2">Değerlendirme Ölçütü</th>
+                <th class="level-4">4 (Mükemmel)</th>
+                <th class="level-3">3 (İyi)</th>
+                <th class="level-2">2 (Gelişiyor)</th>
+                <th class="level-1">1 (Yetersiz)</th>
+                <th>PUAN (4-1)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1. İçerik ve Anlam</td>
+                <td>Açıklama</td>
+                <td>Konu, hakim yaklaşımla aktarılır...</td>
+                <td>Faktörlerin çoğunu doğru açıklamış...</td>
+                <td>Bazı faktörler yüzeysel...</td>
+                <td>Faktörler yanlış veya ilgisiz...</td>
+                <td><input type="number" min="1" max="4" class="score-input" id="score1"></td>
+            </tr>
+            <tr>
+                <td>2. Düşüncelerin ve Çıkarımın Becerisi</td>
+                <td>Açıklama</td>
+                <td>Konu, haklı kılındığı gösterilen...</td>
+                <td>Çıkarımlar mantıklı ama sınırlı...</td>
+                <td>Çıkarımlar yüzeysel ya da eksiktir...</td>
+                <td>Çıkarımlar tutarsız veya konuyla ilgisizdir.</td>
+                <td><input type="number" min="1" max="4" class="score-input" id="score2"></td>
+            </tr>
+            <tr>
+                <td>3. Yazma ve Dil Kullanımı</td>
+                <td>Açıklama</td>
+                <td>Kitleye uygun, dilbilgisi kurallarına...</td>
+                <td>Kitleye uygun ama dilbilgisi hataları...</td>
+                <td>Dil ve anlatımda bazı tutarsızlıklar...</td>
+                <td>Bazı dilbilgisi ve anlatım açısından anlaşılamazlıklar...</td>
+                <td><input type="number" min="1" max="4" class="score-input" id="score3"></td>
+            </tr>
+            <tr>
+                <td>4. Metin Yapısı ve Düzeni</td>
+                <td>Açıklama</td>
+                <td>Metin, gelişme ve sonuç bölümlerinde...</td>
+                <td>Bölümler genellikle düzenlidir...</td>
+                <td>Bölümler belirsizdir...</td>
+                <td>Yazıda yapı bulunmaz; düzensizdir.</td>
+                <td><input type="number" min="1" max="4" class="score-input" id="score4"></td>
+            </tr>
+            <tr>
+                <td>5. Grup Çalışması ve Katkıları</td>
+                <td>Açıklama</td>
+                <td>Tüm grup üyeleri sürekli biçimde katkıda...</td>
+                <td>Çoğu üye aktif katılmıştır...</td>
+                <td>Katılım sınırlıdır...</td>
+                <td>Grup çalışması yapılmamış...</td>
+                <td><input type="number" min="1" max="4" class="score-input" id="score5"></td>
+            </tr>
+            <tr class="total-score-row">
+                <th colspan="6" style="text-align: right;">TOPLAM PUAN:</th>
+                <th><span id="totalScore">0</span></th>
+            </tr>
+        </tbody>
+    </table>
+    
+    <div class="control-panel">
+        <p>
+            **Değerlendirme Düzeyi:** <br>
+            **17-20 → Mükemmel** | **13-16 → İyi** | **9-12 → Gelişiyor** | **5-8 → Yetersiz** </p>
+
+        <button class="action-button print-button" onclick="printRubric()">📄 YAZDIR (PDF Olarak Çıktı Al)</button>
+        <button class="action-button reset-button" onclick="resetForm()">🔄 SIFIRLA (Yeni Öğrenci)</button>
+        
+        <div style="margin-top: 20px;">
+            <h3>Öğrenci Düzeyi: <span id="level" style="font-weight: bold; color: #dc3545;">Lütfen Puan Giriniz</span></h3>
+        </div>
+    </div>
+</body>
+</html>
